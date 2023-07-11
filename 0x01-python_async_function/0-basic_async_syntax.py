@@ -1,27 +1,17 @@
 #!/usr/bin/env python3
 import asyncio
-"""imports wait_random from the previous python file"""
-wait_random = __import__('0-basic_async_syntax').wait_random
+import random
 
-
-"""declares wait_random parameterized coroutine that waits for a random delay"""
 async def wait_random(max_delay: int = 10) -> float:
-    """[summary]"""
-    import random
-    delay = random.uniform(0, max_delay)
-    await asyncio.sleep(delay)
-    return delay
-
-
-"""imports wait_random from the previous python file"""
-def task_wait_random(max_delay: int = 10) -> asyncio.Task:
-    """[summary]
+    """waits for a random delay between 0 and max_delay (included and float value) seconds and eventually returns it.
 
     Args:
-        max_delay (int, optional): [description]. Defaults to 10.
+        max_delay (int, optional): Defaults to 10.
 
     Returns:
-        asyncio.Task: [description]
+        float: which is the random delay
     """
-    task = asyncio.create_task(wait_random(max_delay))
-    return task
+    random_delay = random.uniform(0, max_delay)
+    await asyncio.sleep(random_delay)
+
+    return random_delay
