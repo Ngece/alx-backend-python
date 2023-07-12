@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """ This module contains a function with annotations """
 
-from typing import Union, Tuple
+from typing import Sequence, Any, Union
 
-def safely_get_value(dct: dict, key: str, default: Union[None, Tuple[None, None]]) -> Union[None, int, float, str, Tuple[None, None]]:
-    """ Returns the value of a key safely """
-    if key in dct:
-        return dct[key]
+
+def safe_first_element(lst: Sequence[Any]) -> Union[Any, None]:
+    ''' Return the first element of lst if there is any, otherwise None. '''
+    if lst:
+        return lst[0]
     else:
-        return default
+        return None
