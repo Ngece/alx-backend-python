@@ -3,16 +3,16 @@
 
 import asyncio
 import random
-import time
+from time import time
 from typing import List
 
 wait_n = __import__('1-concurrent_coroutines').wait_n
 
 async def measure_time(n: int, max_delay: int) -> float:
     """returns time it takes to execute wait_n"""
-    start = time.perf_counter()
+    start = time()
     await wait_n(n, max_delay)
-    end = time.perf_counter()
+    end = time()
     total_time = end - start
-    
+
     return total_time / n
