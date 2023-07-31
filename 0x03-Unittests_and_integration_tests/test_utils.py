@@ -14,6 +14,7 @@ class TestAccessNestedMap(unittest.TestCase):
         ({"a": {"b": 2}}, ("a",), {"b": 2}),
         ({"a": {"b": 2}}, ("a", "b"), 2)
     ])
+
     def test_access_nested_map(self, nested_map, path, expected):
         """Test access_nested_map function"""
         self.assertEqual(access_nested_map(nested_map, path), expected)
@@ -22,6 +23,7 @@ class TestAccessNestedMap(unittest.TestCase):
         ({}, ("a",), "a"),
         ({"a": 1}, ("a", "b"), "b")
     ])
+
     def test_access_nested_map_exception(self, nested_map, path, expected):
         """Test access_nested_map function"""
         with self.assertRaises(KeyError) as error:
@@ -34,7 +36,9 @@ class TestGetJson(unittest.TestCase):
         ("http://example.com", {"payload": True}),
         ("http://holberton.io", {"payload": False})
     ])
+
     @patch('test_utils.get_json')
+
     def test_get_json(self, test_url, test_payload, mock_get):
         """Test get_json function"""
         mock_get.return_value = test_payload
@@ -73,6 +77,7 @@ class TestAsyncMock(unittest.TestCase):
 class TestAsyncCall(unittest.TestCase):
     """TestAsyncCall Class"""
     @patch('test_utils.async_call')
+    
     def test_async_call(self, mock_async):
         """Test async_call function"""
         mock_async.return_value = 'test'
