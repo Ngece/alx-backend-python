@@ -2,10 +2,10 @@
 """Unit tests for utils.py file"""
 
 import unittest
+import asyncio
 from unittest.mock import patch, Mock, PropertyMock
 from parameterized import parameterized
-from utils import access_nested_map, get_json, memoize
-from utils import AsyncMock, async_call
+from utils import access_nested_map, get_json, memoize, AsyncMock, async_call
 
 class TestAccessNestedMap(unittest.TestCase):
     """TestAccessNestedMap Class"""
@@ -28,7 +28,7 @@ class TestAccessNestedMap(unittest.TestCase):
         """Test access_nested_map function"""
         with self.assertRaises(KeyError) as error:
             access_nested_map(nested_map, path)
-        self.assertEqual(f"KeyError('{expected}')", repr(error.exception)) 
+        self.assertEqual(f"KeyError('{expected}')", repr(error.exception))
 
 class TestGetJson(unittest.TestCase):
     """TestGetJson Class"""
@@ -36,12 +36,10 @@ class TestGetJson(unittest.TestCase):
         ("http://example.com", {"payload": True}),
         ("http://holberton.io", {"payload": False})
     ])
-
-    @patch('test_utils.get_json')
-
+    @patch('utils.requests.get')  # Correct the path for the patch
     def test_get_json(self, test_url, test_payload, mock_get):
         """Test get_json function"""
-        mock_get.return_value = test_payload
+        mock_get.return_value.json.return_value = test_payload
         self.assertEqual(get_json(test_url), test_payload)
         mock_get.assert_called_once_with(test_url)
 
@@ -76,8 +74,7 @@ class TestAsyncMock(unittest.TestCase):
 
 class TestAsyncCall(unittest.TestCase):
     """TestAsyncCall Class"""
-    @patch('test_utils.async_call')
-    
+    @patch('utils.async_call')  # Correct the path for the patch
     def test_async_call(self, mock_async):
         """Test async_call function"""
         mock_async.return_value = 'test'
