@@ -1,76 +1,68 @@
 #!/usr/bin/env python3
-"""Generic utilities for github org client."""
+"""Unit tests for GithubOrgClient class"""
 
-import requests
-from functools import wraps
-from typing import (
-    Mapping,
-    Sequence,
-    Any,
-    Dict,
-    Callable,
-)
+import unittest
+from unittest.mock import patch
+from parameterized import parameterized
+from client import GithubOrgClient
 
-__all__ = [
-    "access_nested_map",
-    "get_json",
-    "memoize",
-]
+class TestGithubOrgClient(unittest.TestCase):
+    """TestGithubOrgClient Class"""
 
+    @parameterized.expand([
+        ("google",),
+        ("abc",),
+    ])
+    @patch('client.get_json')  # Patch the get_json function
+    def test_org(self, org_name, mock_get_json):
+        """Test org method"""
+        test_payload = {'payload_key': 'payload_value'}
+        mock_get_json.return_value = test_payload
+        client = GithubOrgClient(org_name)
+        self.assertEqual(client.org(), test_payload)
+        mock_get_json.assert_called_once_with(client.ORG_URL.format(org=org_name))
 
-def access_nested_map(nested_map: Mapping, path: Sequence) -> Any:
-    """Access nested map with key path.
-    Parameters
-    ----------
-    nested_map: Mapping
-        A nested map
-    path: Sequence
-        a sequence of key representing a path to the value
-    Example
-    -------
-    >>> nested_map = {"a": {"b": {"c": 1}}}
-    >>> access_nested_map(nested_map, ["a", "b", "c"])
-    1
-    """
-    for key in path:
-        if not isinstance(nested_map, Mapping):
-            raise KeyError(key)
-        nested_map = nested_map[key]
+    @patch('client.GithubOrgClient.org')  # Patch the org property
+    def test_public_repos_url(self, mock_org):
+        """Test _public_repos_url property"""
+        test_payload = {'repos_url': 'https://example.com/repos'}
+        mock_org.return_value = test_payload
+        client = GithubOrgClient("test_org")
+        self.assertEqual(client._public_repos_url, test_payload['repos_url'])
 
-    return nested_map
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """TestIntegrationGithubOrgClient Class"""
 
+    @classmethod
+    def setUpClass(cls):
+        """Set up for integration test"""
+        cls.get_patcher = patch('client.requests.get')
+        cls.mock_get = cls.get_patcher.start()
 
-def get_json(url: str) -> Dict:
-    """Get JSON from remote URL.
-    """
-    response = requests.get(url)
-    return response.json()
+    @classmethod
+    def tearDownClass(cls):
+        """Tear down for integration test"""
+        cls.get_patcher.stop()
 
+    @parameterized.expand([
+        ('org_payload', 'expected_repos'),
+        ('repos_payload', 'apache2_repos'),
+    ])
+    @patch('client.GithubOrgClient.org')
+    def test_public_repos(self, payload_fixture, expected_repos_fixture, mock_org):
+        """Integration test for public_repos method"""
+        client = GithubOrgClient("test_org")
+        mock_org.return_value = globals()[payload_fixture]
+        expected_repos = globals()[expected_repos_fixture]
+        self.assertEqual(client.public_repos(), expected_repos)
 
-def memoize(fn: Callable) -> Callable:
-    """Decorator to memoize a method.
-    Example
-    -------
-    class MyClass:
-        @memoize
-        def a_method(self):
-            print("a_method called")
-            return 42
-    >>> my_object = MyClass()
-    >>> my_object.a_method
-    a_method called
-    42
-    >>> my_object.a_method
-    42
-    """
-    attr_name = "_{}".format(fn.__name__)
+    @patch('client.GithubOrgClient.org')
+    def test_public_repos_with_license(self, mock_org):
+        """Integration test for public_repos method with license argument"""
+        client = GithubOrgClient("test_org")
+        mock_org.return_value = globals()['org_payload']
+        expected_repos = globals()['apache2_repos']
+        self.assertEqual(client.public_repos(license="apache-2.0"), expected_repos)
 
-    @wraps(fn)
-    def memoized(self):
-        """Memoized function"""
-        if not hasattr(self, attr_name):
-            setattr(self, attr_name, fn(self))
-        return getattr(self, attr_name)
-
-    return property(memoized)
-
+if __name__ == '__main__':
+    unittest.main()
