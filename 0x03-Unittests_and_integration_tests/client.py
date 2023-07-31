@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+code #!/usr/bin/env python3
 """A github org client
 """
 from typing import (
